@@ -2,7 +2,7 @@
 <Configuration status="INFO">
     <!--    해당 설정파일에서 사용하는 프로퍼티-->
     <Properties>
-        <Property name="logNm">${sys:logNm:-log}</Property>
+        <Property name="logNm">${sys:logName:-log}</Property>
         <Property name="layoutPattern">%d{yyyy/MM/dd HH:mm:ss,SSS} [%-5p] [%C] [%t] - %m%n</Property>
         <!--<Property name="layoutPattern">%style{%d{yyyy/MM/dd HH:mm:ss,SSS}}{cyan} %highlight{[%-5p]}{FATAL=bg_red, ERROR=red,
             INFO=green, DEBUG=blue}  [%C] %style{[%t]}{yellow}- %m%n</Property>-->
