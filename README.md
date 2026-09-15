@@ -92,7 +92,7 @@
 ```
 
 **설명**:
-- `stt`: 전사 결과 (번역이 적용된 경우 번역된 텍스트)
+- `stt`: 전사 결과
 - `callerOrCallee`: `0` = 발신자(신고자), `1` = 수신자(수보자)
 - `callerNo`: 발신전화번호
 - `calleeNo`: 수신전화번호 (수보대 내선번호)
@@ -100,3 +100,20 @@
 - `date`: 전화받은 날짜 (yyyyMMddHHmmss)
 - `sid`: 문장순번
 - `stype`: `0` = epd 미검출 (중간 문장), `1` = epd 검출 (완료 문장)
+
+## Docker 사용법
+```bash
+cd docker
+docker-compose build
+docker-compose up -d
+
+# 상태확인
+docker-compose ps
+docker logs -f stt-client-1001
+
+# 특정 내선만 재시작
+docker-compose restart stt-client-1002
+
+# 전체 종료
+docker-compose down
+```
