@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+
+  stt-client-1001:
+    build: .
+    image: stt-client:latest
+    container_name: stt-client-1001
+    env_file:
+      - ./env/device-1001.env
+    volumes:
+      - ./logs/1001:/app/logs                          # log4j가 파일로 로그 남기는 경우 호스트에 영구 저장
+    restart: unless-stopped
+    networks:
+      - stt-net
+
+  # 내선(디바이스)이 늘어나면 위 형태를 복사해서 stt-client-1003, 1004 ... 로 추가
+
+networks:
+  stt-net:
+    driver: bridge
