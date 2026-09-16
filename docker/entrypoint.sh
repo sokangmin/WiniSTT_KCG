@@ -40,7 +40,7 @@ if ! [[ "${CODEC}" =~ ^[0-3]$ ]]; then
 fi
 
 JAR_PATH="/app/stt-client.jar"
-MAIN_CLASS="${MAIN_CLASS:-Main}"   # 필요 시 -e MAIN_CLASS=com.example.Main 으로 지정
+MAIN_CLASS="${MAIN_CLASS:-}"   # 필요 시 -e MAIN_CLASS=com.example.Main 으로 지정
 
 # -----------------------------------------------------------------------------
 # 2. 설정값 로그 출력 (비밀번호는 마스킹)
