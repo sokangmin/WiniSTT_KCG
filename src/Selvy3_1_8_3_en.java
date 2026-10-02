@@ -149,8 +149,10 @@ public class Selvy3_1_8_3_en implements SttAdapter {
                 LVCSR_RECOG_RESULT resultInfo = new LVCSR_RECOG_RESULT();
                 ret = lib.SelvySTT_GET_RES(resultInfo);
 
-                if(!resultMidInfo.getStrResult().trim().isEmpty())
-                    return new RecogData(resultMidInfo.getStrResult(), Epd.EPD_FOUND);
+                if(resultMidInfo.getStrResult() != null) {
+                    if (!resultMidInfo.getStrResult().trim().isEmpty())
+                        return new RecogData(resultMidInfo.getStrResult(), Epd.EPD_FOUND);
+                }
             }
         } catch (Exception e) {
             logger.error("", e);

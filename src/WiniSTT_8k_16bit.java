@@ -55,7 +55,7 @@ public class WiniSTT_8k_16bit {
 
             Topic[] voiceNendTopics = {new Topic("call2/+/voice/" + info.getCalleeNo() + "/" +
                     info.getCallerOrCallee().getValue() + "/4", QoS.AT_MOST_ONCE),
-                    new Topic("call2/+/stop/" + info.getCalleeNo(), QoS.AT_MOST_ONCE),
+                    new Topic("call2/+/end/" + info.getCalleeNo(), QoS.AT_MOST_ONCE),
                     new Topic("call2/+/change/" + info.getCalleeNo(), QoS.AT_MOST_ONCE)};
             voiceNendConn = voiceNendMqtts.blockingConnection();
             voiceNendConn.connect();
@@ -83,7 +83,7 @@ public class WiniSTT_8k_16bit {
             while (true) {
                 Message msg = voiceNendConn.receive();
                 String topicNm = msg.getTopic();
-                if(topicNm.matches("^call2/[^/]+/stop/\\d+$")) {
+                if(topicNm.matches("^call2/[^/]+/end/\\d+$")) {
                     logger.info("call/end(122_{}_{})", info.getSession(), info.getCallerOrCallee().getValue());
                     return null;
                 } else if (topicNm.matches("^call2/[^/]+/change/\\d+$")) {
