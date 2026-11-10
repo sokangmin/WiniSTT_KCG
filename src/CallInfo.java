@@ -82,7 +82,7 @@ public class CallInfo {
         public static CallerOrCallee getCallerOrCallerById(int value) {
             CallerOrCallee event = null;
             switch (value) {
-                case 2:
+                case 0:
                     event = Caller;
                     break;
                 case 1:

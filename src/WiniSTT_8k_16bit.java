@@ -9,6 +9,12 @@ import org.apache.logging.log4j.util.Strings;
 import org.fusesource.mqtt.client.*;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -78,6 +84,7 @@ public class WiniSTT_8k_16bit {
             init(info, transactionId);
 
             logger.info("call/start({})", transactionId);
+
             // 음성메시지 처리
             logger.debug("Send Audio Data");
             while (true) {
@@ -102,7 +109,17 @@ public class WiniSTT_8k_16bit {
                     String result = send_data(bArr);
                     if (Strings.isNotEmpty(result)) {
                         logger.debug("call/stt({}) : {}", transactionId, result);
-                        sttConn.publish("call2/"+ info.getOrgId()+"/stt/"+info.getCalleeNo()+"/"+info.getCallerOrCallee().getValue(), result.getBytes(), QoS.AT_MOST_ONCE, false);
+                        //sttConn.publish("call2/"+ info.getOrgId()+"/stt/"+info.getCalleeNo()+"/"+info.getCallerOrCallee().getValue(), result.getBytes(), QoS.AT_MOST_ONCE, false);
+                        HttpResponse<String> response;
+                        try (HttpClient client = HttpClient.newHttpClient()) {
+                            HttpRequest request = HttpRequest.newBuilder()
+                                    .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/sttdata"))
+                                    .header("Content-Type", "application/json")
+                                    .POST(HttpRequest.BodyPublishers.ofString(result)).build();
+                            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                        }
+                        logger.debug("response code : {}", response.statusCode());
+
                     }
                     buf.clear();
                 }
@@ -119,9 +136,20 @@ public class WiniSTT_8k_16bit {
             String result = send_final_data(bArr);
             if (Strings.isNotEmpty(result)) {
                 logger.debug("call/stt(final)({}) : {}", transactionId, result);
-                try {
+                /*try {
                     Objects.requireNonNull(sttConn).publish("cs/stt", result.getBytes(), QoS.AT_MOST_ONCE, false);
                 } catch (Exception ignored) {
+                }*/
+                HttpResponse<String> response_final;
+                try (HttpClient client = HttpClient.newHttpClient()) {
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/sttdata"))
+                            .header("Content-Type", "application/json")
+                            .POST(HttpRequest.BodyPublishers.ofString(result)).build();
+                    response_final = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    logger.debug("response code : {}", response_final.statusCode());
+                } catch (InterruptedException | URISyntaxException | IOException e) {
+                    logger.error("", e);
                 }
             }
             close();
@@ -175,7 +203,8 @@ public class WiniSTT_8k_16bit {
                     bEpdEnd = false;
                     sMidRst = recogData.text;
 
-                    return result2Json(info, sid, sMidRst, recogData.epd.getValue(), sDate);
+                    //return result2Json(info, sid, sMidRst, recogData.epd.getValue(), sDate);
+                    return null;
                 }
                 case EPD_FOUND: {
                     if(bEpdEnd) {
@@ -196,17 +225,24 @@ public class WiniSTT_8k_16bit {
     }
 
     ObjectMapper mapper = new ObjectMapper();
+
     private String result2Json(CallInfo info, int sid, String sMidRst, int sType, String sDate) {
         if(Strings.isNotEmpty(sMidRst)) {
             HashMap<String, String> map = new HashMap<>();
-            map.put("stt", sMidRst);
-            map.put("callerOrCallee", String.valueOf(info.getCallerOrCallee().getValue()));
-            map.put("callerNo", info.getCallerNo());
-            map.put("calleeNo", info.getCalleeNo());
-            map.put("session", info.getSession());
-            map.put("date", sDate);
-            map.put("sid", String.valueOf(sid));
-            map.put("stype", String.valueOf(sType));
+            map.put("stt_text", sMidRst);
+
+            if(info.getCallerOrCallee().getValue() == 0) {
+                map.put("caller_or_callee", "rx");
+            } else {
+                map.put("caller_or_callee", "tx");
+            }
+            //map.put("caller_or_callee", String.valueOf(info.getCallerOrCallee().getValue()));
+            //map.put("callerNo", info.getCallerNo());
+            //map.put("calleeNo", info.getCalleeNo());
+            map.put("call_session_id", info.getSession());
+            //map.put("date", sDate);
+            //map.put("call_session_id", String.valueOf(sid));
+            //map.put("stype", String.valueOf(sType));
 //            map.put("lang", info.getLang());
 
             String json = null;

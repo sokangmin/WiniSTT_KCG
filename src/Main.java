@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,11 +7,16 @@ import org.fusesource.mqtt.client.*;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -107,6 +113,26 @@ public class Main {
                     sid = 0;
                     lang = "ko";
                     WiniSTT_8k_16bit.setSID(0);
+
+                    HttpResponse<String> response_start;
+                    String call_info = result2Json_start(session, calleeNo);
+                    logger.debug("call/start({}) : {}", session, call_info);
+                    try (HttpClient client = HttpClient.newHttpClient()) {
+                        HttpRequest request = HttpRequest.newBuilder()
+                                .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/call_session"))
+                                .header("Content-Type", "application/json")
+                                .POST(HttpRequest.BodyPublishers.ofString(call_info)).build();
+                        //logger.debug("header : {}", request.headers().toString());
+                        request.headers().map().forEach((key, values) -> {
+                            logger.debug(key+":"+String.join(", ",values));
+                        });
+
+                        response_start = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    }
+
+
+                    logger.debug("response code : {}", response_start.statusCode());
+
                 } else {    // 언어변경일 경우
                     Map<String, String> map = mapper.readValue(lastCallInfo.getBytes(StandardCharsets.UTF_8), Map.class);
                     session = map.get("session");
@@ -147,6 +173,18 @@ public class Main {
                 String str2 = calleeThread.get();
                 if(Objects.isNull(str1)) {
                     lastCallInfo = null;
+                    HttpResponse<String> response_end;
+                    String call_end = result2Json_end(session);
+                    logger.debug("call/end({}) : {}", session, call_end);
+                    try (HttpClient client = HttpClient.newHttpClient()) {
+                        HttpRequest request = HttpRequest.newBuilder()
+                                .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/close_session"))
+                                .header("Content-Type", "application/json")
+                                .POST(HttpRequest.BodyPublishers.ofString(call_end)).build();
+                        response_end = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    }
+                    logger.debug("response code : {}", response_end.statusCode());
+
                 } else {
                     lastCallInfo = str2;
                 }
@@ -157,5 +195,36 @@ public class Main {
                 if (callConn != null) try { callConn.kill(); callConn.disconnect(); } catch (Exception ignored) {}
             }
         }
+    }
+
+    static ObjectMapper mapper = new ObjectMapper();
+
+    private static String result2Json_start(String session, String calleeNo) {
+        HashMap<String, String> map = new HashMap<>();
+
+        map.put("call_session_id", session);
+        map.put("desk_id", calleeNo);
+        map.put("desk_ip", "127.0.0.1:8000");
+        map.put("assistant_ip", "127.0.0.1:8000");
+
+        String json = null;
+        try {
+            json = mapper.writeValueAsString(map);
+        } catch (JsonProcessingException ignored) {}
+
+        return json;
+    }
+
+    private static String result2Json_end(String session) {
+        HashMap<String, String> map = new HashMap<>();
+
+        map.put("call_session_id", session);
+
+        String json = null;
+        try {
+            json = mapper.writeValueAsString(map);
+        } catch (JsonProcessingException ignored) {}
+
+        return json;
     }
 }
