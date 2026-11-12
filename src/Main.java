@@ -117,10 +117,10 @@ public class Main {
                     HttpResponse<String> response_start;
                     String call_info = result2Json_start(session, calleeNo);
                     logger.debug("call/start({}) : {}", session, call_info);
-                    try (HttpClient client = HttpClient.newHttpClient()) {
+                    try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                         HttpRequest request = HttpRequest.newBuilder()
                                 .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/call_session"))
-                                .header("Content-Type", "application/json")
+                                .header("Content-Type", "application/json; charset=utf-8")
                                 .POST(HttpRequest.BodyPublishers.ofString(call_info)).build();
                         //logger.debug("header : {}", request.headers().toString());
                         request.headers().map().forEach((key, values) -> {
@@ -176,10 +176,10 @@ public class Main {
                     HttpResponse<String> response_end;
                     String call_end = result2Json_end(session);
                     logger.debug("call/end({}) : {}", session, call_end);
-                    try (HttpClient client = HttpClient.newHttpClient()) {
+                    try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                         HttpRequest request = HttpRequest.newBuilder()
                                 .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/close_session"))
-                                .header("Content-Type", "application/json")
+                                .header("Content-Type", "application/json; charset=utf-8")
                                 .POST(HttpRequest.BodyPublishers.ofString(call_end)).build();
                         response_end = client.send(request, HttpResponse.BodyHandlers.ofString());
                     }

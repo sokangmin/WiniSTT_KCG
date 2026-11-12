@@ -111,10 +111,10 @@ public class WiniSTT_8k_16bit {
                         logger.debug("call/stt({}) : {}", transactionId, result);
                         //sttConn.publish("call2/"+ info.getOrgId()+"/stt/"+info.getCalleeNo()+"/"+info.getCallerOrCallee().getValue(), result.getBytes(), QoS.AT_MOST_ONCE, false);
                         HttpResponse<String> response;
-                        try (HttpClient client = HttpClient.newHttpClient()) {
+                        try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                             HttpRequest request = HttpRequest.newBuilder()
                                     .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/sttdata"))
-                                    .header("Content-Type", "application/json")
+                                    .header("Content-Type", "application/json; charset=utf-8")
                                     .POST(HttpRequest.BodyPublishers.ofString(result)).build();
                             response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         }
@@ -141,10 +141,10 @@ public class WiniSTT_8k_16bit {
                 } catch (Exception ignored) {
                 }*/
                 HttpResponse<String> response_final;
-                try (HttpClient client = HttpClient.newHttpClient()) {
+                try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                     HttpRequest request = HttpRequest.newBuilder()
                             .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/sttdata"))
-                            .header("Content-Type", "application/json")
+                            .header("Content-Type", "application/json; charset=utf-8")
                             .POST(HttpRequest.BodyPublishers.ofString(result)).build();
                     response_final = client.send(request, HttpResponse.BodyHandlers.ofString());
                     logger.debug("response code : {}", response_final.statusCode());
