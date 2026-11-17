@@ -119,7 +119,7 @@ public class Main {
                     logger.debug("call/start({}) : {}", session, call_info);
                     try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                         HttpRequest request = HttpRequest.newBuilder()
-                                .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/call_session"))
+                                .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8005/call_session"))
                                 .header("Content-Type", "application/json; charset=utf-8")
                                 .POST(HttpRequest.BodyPublishers.ofString(call_info)).build();
                         //logger.debug("header : {}", request.headers().toString());
@@ -178,7 +178,7 @@ public class Main {
                     logger.debug("call/end({}) : {}", session, call_end);
                     try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                         HttpRequest request = HttpRequest.newBuilder()
-                                .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/close_session"))
+                                .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8005/close_session"))
                                 .header("Content-Type", "application/json; charset=utf-8")
                                 .POST(HttpRequest.BodyPublishers.ofString(call_end)).build();
                         response_end = client.send(request, HttpResponse.BodyHandlers.ofString());

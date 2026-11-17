@@ -113,7 +113,7 @@ public class WiniSTT_8k_16bit {
                         HttpResponse<String> response;
                         try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                             HttpRequest request = HttpRequest.newBuilder()
-                                    .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/sttdata"))
+                                    .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8005/sttdata"))
                                     .header("Content-Type", "application/json; charset=utf-8")
                                     .POST(HttpRequest.BodyPublishers.ofString(result)).build();
                             response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -143,7 +143,7 @@ public class WiniSTT_8k_16bit {
                 HttpResponse<String> response_final;
                 try (HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
                     HttpRequest request = HttpRequest.newBuilder()
-                            .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8000/sttdata"))
+                            .uri(new URI("http://kcg-svcmgr.ngg.ai.kr:8005/sttdata"))
                             .header("Content-Type", "application/json; charset=utf-8")
                             .POST(HttpRequest.BodyPublishers.ofString(result)).build();
                     response_final = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -203,8 +203,7 @@ public class WiniSTT_8k_16bit {
                     bEpdEnd = false;
                     sMidRst = recogData.text;
 
-                    //return result2Json(info, sid, sMidRst, recogData.epd.getValue(), sDate);
-                    return null;
+                    return result2Json(info, sid, sMidRst, recogData.epd.getValue(), sDate);
                 }
                 case EPD_FOUND: {
                     if(bEpdEnd) {
@@ -243,6 +242,11 @@ public class WiniSTT_8k_16bit {
             //map.put("date", sDate);
             //map.put("call_session_id", String.valueOf(sid));
             //map.put("stype", String.valueOf(sType));
+            if(sType == 0) {
+                map.put("partial", "true");
+            } else {
+                map.put("partial", "false");
+            }
 //            map.put("lang", info.getLang());
 
             String json = null;

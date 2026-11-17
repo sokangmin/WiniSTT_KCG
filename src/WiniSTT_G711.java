@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WiniSTT {
-    static final Logger logger = LogManager.getLogger(WiniSTT.class);
+public class WiniSTT_G711 {
+    static final Logger logger = LogManager.getLogger(WiniSTT_G711.class);
     private final SttAdapter stt;
     private final CallInfo info;
     private boolean bEpdEnd = true;
@@ -24,7 +24,7 @@ public class WiniSTT {
     private int sid;
     private String sDate;
 
-    public WiniSTT(SttAdapter stt, CallInfo info) {
+    public WiniSTT_G711(SttAdapter stt, CallInfo info) {
         this.stt = stt;
         this.info = info;
     }
